@@ -14,7 +14,13 @@ jobs:
             echo ::set-output name=match::true
             echo ::set-output name=image_tag::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9\-_]+):.+$")
             echo ::set-output name=image::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9\-_]+):.+$" | awk -F ':' '{print $1}')
+          else
+            echo ::set-output name=match::false
           fi
+
+      - name: Checkout
+        if: steps.check-title.outputs.match == 'true'
+        uses: actions/checkout@v2
 
       - name: Add label
         if: steps.check-title.outputs.match == 'true'
