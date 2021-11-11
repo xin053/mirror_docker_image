@@ -14,7 +14,6 @@ jobs:
             echo ::set-output name=match::true
             echo ::set-output name=image_tag::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9\-_]+):.+$")
             echo ::set-output name=image::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9\-_]+):.+$" | awk -F ':' '{print $1}')
-            echo ::set-output name=tag::$(echo ${{ github.event.issue.title }} | awk -F ':' '{print $2}')
           fi
 
       - name: Add label
@@ -29,14 +28,17 @@ jobs:
           docker pull ${{ github.event.issue.title }}
           docker tag ${{ github.event.issue.title }} ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}
 
-      - name: Publish to docker hub
+      - name: Login to docker hub
         if: steps.check-title.outputs.match == 'true'
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: docker/login-action@v1
         with:
-          name: ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: "${{ steps.check-title.outputs.tag }}"
+
+      - name: Push image to docker hub
+        if: steps.check-title.outputs.match == 'true'
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}
 
       - name: Add docker hub description
         if: steps.check-title.outputs.match == 'true'
@@ -53,4 +55,3 @@ jobs:
         with:
           comment: |
             Image has been uploaded to docker hub, use `docker pull ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}` to pull the image.
-
