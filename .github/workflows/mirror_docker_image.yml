@@ -1,36 +1,56 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the workflow will run
+name: mirror_docker_image
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  issues:
+    types: [opened]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  run:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Check issue's title
+        id: check-title
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          if echo ${{ github.event.issue.title }} | grep -qE "^(.+/)([a-z0-9\-_]+):.+$"; then
+            echo ::set-output name=match::true
+            echo ::set-output name=image_tag::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9\-_]+):.+$")
+            echo ::set-output name=image::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9\-_]+):.+$" | awk -F ':' '{print $1}')
+            echo ::set-output name=tag::$(echo ${{ github.event.issue.title }} | awk -F ':' '{print $2}')
+          fi
+
+      - name: Add label
+        if: steps.check-title.outputs.match == 'true'
+        uses: andymckay/labeler@master
+        with:
+          add-labels: "docker_image"
+
+      - name: Pull image
+        if: steps.check-title.outputs.match == 'true'
+        run: |
+          docker pull ${{ github.event.issue.title }}
+          docker tag ${{ github.event.issue.title }} ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}
+
+      - name: Publish to docker hub
+        if: steps.check-title.outputs.match == 'true'
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: "${{ steps.check-title.outputs.tag }}"
+
+      - name: Add docker hub description
+        if: steps.check-title.outputs.match == 'true'
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image }}
+          short-description: "mirror of ${{ github.event.issue.title }}"
+
+      - name: Close issue
+        if: steps.check-title.outputs.match == 'true'
+        uses: peter-evans/close-issue@v1
+        with:
+          comment: |
+            Image has been uploaded to docker hub, use `docker pull ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}` to pull the image.
+
