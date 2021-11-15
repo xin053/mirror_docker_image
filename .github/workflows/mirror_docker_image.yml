@@ -4,60 +4,121 @@ on:
     types: [opened]
 
 jobs:
-  run:
+  check:
     runs-on: ubuntu-latest
+    outputs:
+      match: ${{ steps.check-title.outputs.match }}
+      source_registry: ${{ steps.check-title.outputs.source_registry }}
+      image_tag: ${{ steps.check-title.outputs.image_tag }}
+      image: ${{ steps.check-title.outputs.image }}
     steps:
       - name: Check issue's title
         id: check-title
         run: |
           if echo ${{ github.event.issue.title }} | grep -qE "^(.+\/)([a-z0-9_\-]+):.+$"; then
             echo ::set-output name=match::true
+            echo ::set-output name=source_registry::$(echo ${{ github.event.issue.title }} | awk -F '/' '{print $1}')
             echo ::set-output name=image_tag::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9_\-]+):.+$")
             echo ::set-output name=image::$(echo ${{ github.event.issue.title }} | grep -oE "([a-z0-9_\-]+):.+$" | awk -F ':' '{print $1}')
           else
             echo ::set-output name=match::false
           fi
 
+      - name: Debug info
+        run: |
+          echo "match: ${{ steps.check-title.outputs.match }}"
+          echo "source_registry: ${{ steps.check-title.outputs.source_registry }}"
+          echo "image_tag: ${{ steps.check-title.outputs.image_tag }}"
+          echo "image: ${{ steps.check-title.outputs.image }}"
+
+  run:
+    runs-on: ubuntu-latest
+    needs: check
+    if: ${{ needs.check.outputs.match == true }}
+    timeout-minutes: 30
+    env:
+      TARGET_REGISTRY: docker.io
+    steps:
       - name: Checkout
-        if: steps.check-title.outputs.match == 'true'
         uses: actions/checkout@v2
 
       - name: Add label
-        if: steps.check-title.outputs.match == 'true'
         uses: andymckay/labeler@master
         with:
           add-labels: "docker_image"
 
-      - name: Pull image
-        if: steps.check-title.outputs.match == 'true'
+      - name: Check secrets SOURCE_USERNAME
         run: |
-          docker pull ${{ github.event.issue.title }}
-          docker tag ${{ github.event.issue.title }} ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}
+          if [ ! -z "${{ secrets.SOURCE_USERNAME }}" ]; then
+            echo "SOURCE_USERNAME=true" >> $GITHUB_ENV
+          fi
 
-      - name: Login to docker hub
-        if: steps.check-title.outputs.match == 'true'
+      - name: Login to SOURCE_REGISTRY
+        if: ${{ env.SOURCE_USERNAME == true }}
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ needs.check.outputs.source_registry }}
+          username: ${{ secrets.SOURCE_USERNAME }}
+          password: ${{ secrets.SOURCE_PASSWORD }}
 
-      - name: Push image to docker hub
-        if: steps.check-title.outputs.match == 'true'
+      - name: Check secrets TARGET_REGISTRY
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}
+          if [ ! -z "${{ secrets.TARGET_REGISTRY }}" ]; then
+            echo "TARGET_REGISTRY=${{ secrets.TARGET_REGISTRY }}" >> $GITHUB_ENV
+          fi
+
+      - name: Login to TARGET_REGISTRY
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.TARGET_REGISTRY }}
+          username: ${{ secrets.TARGET_USERNAME }}
+          password: ${{ secrets.TARGET_PASSWORD }}
+
+      - name: Pull image
+        timeout-minutes: 10
+        run: |
+          docker pull ${{ github.event.issue.title }}
+
+      - name: Set target image full name
+        if: ${{ env.TARGET_REGISTRY == 'docker.io' }}
+        run: |
+          echo "target_image_name=${{ secrets.TARGET_USERNAME }}/${{ needs.check.outputs.image_tag }}" >> $GITHUB_ENV
+
+      - name: Set target image full name
+        if: ${{ env.TARGET_REGISTRY != 'docker.io' }}
+        run: |
+          echo "target_image_name=${{ env.TARGET_REGISTRY }}/${{ secrets.TARGET_REPOSITORY }}/${{ needs.check.outputs.image_tag }}" >> $GITHUB_ENV
+
+      - name: Retag image
+        run: |
+          docker tag ${{ github.event.issue.title }} ${{ env.target_image_name }}
+
+      - name: Push image to TARGET_REGISTRY
+        run: |
+          docker push ${{ env.target_image_name }}
 
       - name: Add docker hub description
-        if: steps.check-title.outputs.match == 'true'
         uses: peter-evans/dockerhub-description@v2
+        continue-on-error: true
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image }}
+          username: ${{ secrets.TARGET_USERNAME }}
+          password: ${{ secrets.TARGET_PASSWORD }}
+          repository: ${{ secrets.TARGET_USERNAME }}/${{ needs.check.outputs.image }}
           short-description: "mirror of ${{ github.event.issue.title }}"
 
       - name: Close issue
-        if: steps.check-title.outputs.match == 'true'
         uses: peter-evans/close-issue@v1
         with:
           comment: |
-            Image has been uploaded to docker hub, use `docker pull ${{ secrets.DOCKER_USERNAME }}/${{ steps.check-title.outputs.image_tag }}` to pull the image.
+            Image has been uploaded to docker hub, use `docker pull ${{ env.target_image_name }}` to pull the image.
+
+  fail:
+    runs-on: ubuntu-latest
+    needs: run
+    if: ${{ failure() }}
+    steps:
+      - name: Close issue
+        uses: peter-evans/close-issue@v1
+        with:
+          comment: |
+            Something is error, please check the log of github action.
