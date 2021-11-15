@@ -34,7 +34,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     needs: check
-    if: ${{ needs.check.outputs.match == true }}
+    if: ${{ needs.check.outputs.match == 'true' }}
     timeout-minutes: 30
     env:
       TARGET_REGISTRY: docker.io
@@ -54,7 +54,7 @@ jobs:
           fi
 
       - name: Login to SOURCE_REGISTRY
-        if: ${{ env.SOURCE_USERNAME == true }}
+        if: ${{ env.SOURCE_USERNAME == 'true' }}
         uses: docker/login-action@v1
         with:
           registry: ${{ needs.check.outputs.source_registry }}
