@@ -46,7 +46,7 @@ After `fork` this github repository, add the following `secrets`:
 
 For details: [https://github.com/peter-evans/dockerhub-description/issues/10](https://github.com/peter-evans/dockerhub-description/issues/10)
 
-## if the target registry is not `docker.io`
+## If the target registry is not `docker.io`
 
 After `fork` this github repository, add the following `secrets`:
 
