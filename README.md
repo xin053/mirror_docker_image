@@ -55,3 +55,7 @@ After `fork` this github repository, add the following `secrets`:
 | `TARGET_REGISTRY` | target registry, such as `ghcr.io` |
 | `TARGET_USERNAME` |    username of target registry     |
 | `TARGET_USERNAME` |    password of target registry     |
+
+## Project stats
+
+![Alt](https://repobeats.axiom.co/api/embed/11e8bb6f504f02fca58a38db2527c314b8a0b9c4.svg "Repobeats analytics image")

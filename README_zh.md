@@ -55,3 +55,7 @@
 | `TARGET_REGISTRY` | 目标仓库地址,如 `ghcr.io` |
 | `TARGET_USERNAME` |      目标仓库用户名       |
 | `TARGET_USERNAME` |       目标仓库密码        |
+
+## 项目统计
+
+![Alt](https://repobeats.axiom.co/api/embed/11e8bb6f504f02fca58a38db2527c314b8a0b9c4.svg "Repobeats analytics image")
