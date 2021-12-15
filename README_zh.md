@@ -20,15 +20,20 @@
 
 ![](https://github.com/xin053/mirror_docker_image/blob/main/images/1.png)
 
+## 自定义 `action`
+
+`fork` 该仓库之后, 并到仓库 `settings` 页面中的 `Features` 中勾选 `Issues`, 并且在 `Actions` 页面启用 `github actions`, 然后按照需要添加相应的 `secrets` 后, 即可在自己 `fork` 的仓库中创建 `issue` 来同步 `docker` 镜像了
+
 ## `action` 支持的 `secrets`
 
-|        key        |              value              |
-| :---------------: | :-----------------------------: |
-| `SOURCE_USERNAME` |          源仓库用户名           |
-| `SOURCE_PASSWORD` |           源仓库密码            |
-| `TARGET_REGISTRY` | 目标仓库地址,默认为 `docker.io` |
-| `TARGET_USERNAME` |       `docker hub` 用户名       |
-| `TARGET_USERNAME` |   `docker hub` 密码或 `token`   |
+|         key         |              value              |
+| :-----------------: | :-----------------------------: |
+|  `SOURCE_USERNAME`  |          源仓库用户名           |
+|  `SOURCE_PASSWORD`  |           源仓库密码            |
+|  `TARGET_REGISTRY`  | 目标仓库地址,默认为 `docker.io` |
+| `TARGET_REPOSITORY` |      目标项目地址,默认为空      |
+|  `TARGET_USERNAME`  |       `docker hub` 用户名       |
+|  `TARGET_PASSWORD`  |   `docker hub` 密码或 `token`   |
 
 ## 如果源仓库需要登录
 
@@ -39,7 +44,7 @@
 | `SOURCE_USERNAME` |        源仓库用户名         |
 | `SOURCE_PASSWORD` |         源仓库密码          |
 | `TARGET_USERNAME` |     `docker hub` 用户名     |
-| `TARGET_USERNAME` | `docker hub` 密码或 `token` |
+| `TARGET_PASSWORD` | `docker hub` 密码或 `token` |
 
 
 **备注: docker hub 如果使用 token 登录, 则无法修改 docker hub 对应仓库的描述**
@@ -50,11 +55,12 @@
 
 `fork` 该仓库后, 添加如下 `secrets`
 
-|        key        |           value           |
-| :---------------: | :-----------------------: |
-| `TARGET_REGISTRY` | 目标仓库地址,如 `ghcr.io` |
-| `TARGET_USERNAME` |      目标仓库用户名       |
-| `TARGET_USERNAME` |       目标仓库密码        |
+|         key         |           value           |
+| :-----------------: | :-----------------------: |
+|  `TARGET_REGISTRY`  | 目标仓库地址,如 `ghcr.io` |
+| `TARGET_REPOSITORY` |  目标项目地址,如 `test`   |
+|  `TARGET_USERNAME`  |      目标仓库用户名       |
+|  `TARGET_PASSWORD`  |       目标仓库密码        |
 
 ## 项目统计
 

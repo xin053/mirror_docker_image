@@ -20,15 +20,20 @@ You can view the synchronized docker images through the link below:
 
 ![](https://github.com/xin053/mirror_docker_image/blob/main/images/1.png)
 
+## Customize ` action`
+
+After `fork` this repository, check `issues` in `features` on the `Settings` page of the forked repository, then enable `GitHub actions` on the `Actions` page, add corresponding `secrets` as needed, then you can create `issue` in your forked repository to synchronize the docker image
+
 ## `secrets` supported by `action`
 
-|        key        |                value                 |
-| :---------------: | :----------------------------------: |
-| `SOURCE_USERNAME` |     username of source registry      |
-| `SOURCE_PASSWORD` |     password of source registry      |
-| `TARGET_REGISTRY` | target registry, default `docker.io` |
-| `TARGET_USERNAME` |       username of `docker hub`       |
-| `TARGET_USERNAME` | password or `token` of `docker hub`  |
+|         key         |                value                 |
+| :-----------------: | :----------------------------------: |
+|  `SOURCE_USERNAME`  |     username of source registry      |
+|  `SOURCE_PASSWORD`  |     password of source registry      |
+|  `TARGET_REGISTRY`  | target registry, default `docker.io` |
+| `TARGET_REPOSITORY` |   target repository, default null    |
+|  `TARGET_USERNAME`  |       username of `docker hub`       |
+|  `TARGET_PASSWORD`  | password or `token` of `docker hub`  |
 
 ## If the source registry needs to log in
 
@@ -39,7 +44,7 @@ After `fork` this github repository, add the following `secrets`:
 | `SOURCE_USERNAME` |     username of source registry     |
 | `SOURCE_PASSWORD` |     password of source registry     |
 | `TARGET_USERNAME` |      username of `docker hub`       |
-| `TARGET_USERNAME` | password or `token` of `docker hub` |
+| `TARGET_PASSWORD` | password or `token` of `docker hub` |
 
 
 **Remarks: If you log in with token on docker hub, you cannot modify the description of the synchronized docker images**
@@ -50,11 +55,12 @@ For details: [https://github.com/peter-evans/dockerhub-description/issues/10](ht
 
 After `fork` this github repository, add the following `secrets`:
 
-|        key        |               value                |
-| :---------------: | :--------------------------------: |
-| `TARGET_REGISTRY` | target registry, such as `ghcr.io` |
-| `TARGET_USERNAME` |    username of target registry     |
-| `TARGET_USERNAME` |    password of target registry     |
+|         key         |               value                |
+| :-----------------: | :--------------------------------: |
+|  `TARGET_REGISTRY`  | target registry, such as `ghcr.io` |
+| `TARGET_REPOSITORY` | target repository, such as `test`  |
+|  `TARGET_USERNAME`  |    username of target registry     |
+|  `TARGET_PASSWORD`  |    password of target registry     |
 
 ## Project stats
 
