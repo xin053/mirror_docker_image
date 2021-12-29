@@ -12,11 +12,11 @@
 
 创建一个新的 `issue`, `issue` 标题填写需要同步的镜像(**镜像名称需要是完整名称,不能省略 `registry` 与 `tag`**), `issue` 内容可为空
 
-例如: 创建的 `issue` 标题为 `k8s.gcr.io/kube-state-metrics/kube-state-metrics:latest`, 则 github action 会自动拉取该镜像并推送到 `docker hub` 的 `xin053` 用户下, 之后可通过 `docker pull xin053/kube-state-metrics:latest` 拉取该镜像
+例如: 创建的 `issue` 标题为 `k8s.gcr.io/kube-state-metrics/kube-state-metrics:latest`, 则 github action 会自动拉取该镜像并推送到 `docker hub` 的 [`xin053`](https://hub.docker.com/u/xin053) 用户下, 之后可通过 `docker pull xin053/kube-state-metrics:latest` 拉取该镜像
 
 通过下面的链接可以查看同步过的镜像:
 
-[hub.docker.com/u/xin053](hub.docker.com/u/xin053)
+[https://hub.docker.com/u/xin053](https://hub.docker.com/u/xin053)
 
 ![](https://github.com/xin053/mirror_docker_image/blob/main/images/1.png)
 

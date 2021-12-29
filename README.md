@@ -12,11 +12,11 @@ Synchronize the `docker` image from one registry to another through `github acti
 
 Open a new `issue`, then use the image name to be synchronized as title (**The image name needs to be a full name, which means `registry` and `tag` cannot be omitted**), the content of `issue` can be empty.
 
-For example: open a new `issue` with title `k8s.gcr.io/kube-state-metrics/kube-state-metrics:latest`, Then the github action will automatically pull the image and push it to the [`xin053` repository](hub.docker.com/u/xin053), then you can use `docker pull xin053/kube-state-metrics:latest` command to pull the image.
+For example: open a new `issue` with title `k8s.gcr.io/kube-state-metrics/kube-state-metrics:latest`, Then the github action will automatically pull the image and push it to the [`xin053` repository](https://hub.docker.com/u/xin053), then you can use `docker pull xin053/kube-state-metrics:latest` command to pull the image.
 
 You can view the synchronized docker images through the link below:
 
-[hub.docker.com/u/xin053](hub.docker.com/u/xin053)
+[https://hub.docker.com/u/xin053](https://hub.docker.com/u/xin053)
 
 ![](https://github.com/xin053/mirror_docker_image/blob/main/images/1.png)
 
